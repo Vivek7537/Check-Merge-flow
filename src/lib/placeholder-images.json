@@ -1,3 +1,64 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "1",
+      "description": "A couple at their wedding",
+      "imageUrl": "https://picsum.photos/seed/1/600/400",
+      "imageHint": "wedding couple"
+    },
+    {
+      "id": "2",
+      "description": "A professional person for corporate headshots",
+      "imageUrl": "https://picsum.photos/seed/2/600/400",
+      "imageHint": "business person"
+    },
+    {
+      "id": "3",
+      "description": "A modern house for real estate",
+      "imageUrl": "https://images.unsplash.com/photo-1628012209120-d9db7abf7eab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxtb2Rlcm4lMjBob3VzZXxlbnwwfHx8fDE3NjU4ODE2NDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern house"
+    },
+    {
+      "id": "4",
+      "description": "A tech gadget for a product launch",
+      "imageUrl": "https://picsum.photos/seed/4/600/400",
+      "imageHint": "product tech"
+    },
+    {
+      "id": "5",
+      "description": "A family gathering",
+      "imageUrl": "https://images.unsplash.com/photo-1464207687429-7505649dae38?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmYW1pbHklMjBnYXRoZXJpbmd8ZW58MHx8fHwxNzY1OTA1ODk1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "family gathering"
+    },
+    {
+      "id": "6",
+      "description": "A birthday party celebration",
+      "imageUrl": "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxiaXJ0aGRheSUyMHBhcnR5fGVufDB8fHx8MTc2NTg4NTEzN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "birthday party"
+    },
+    {
+      "id": "7",
+      "description": "An architectural building",
+      "imageUrl": "https://images.unsplash.com/photo-1519114761417-81be330afa42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhcmNoaXRlY3R1cmUlMjBidWlsZGluZ3xlbnwwfHx8fDE3NjU5NjAwNDh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "architecture building"
+    },
+    {
+      "id": "8",
+      "description": "A cute dog for a pet portrait session",
+      "imageUrl": "https://images.unsplash.com/photo-1586671267731-da2cf3ceeb80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjdXRlJTIwZG9nfGVufDB8fHx8MTc2NTk0MzI4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cute dog"
+    },
+    {
+      "id": "9",
+      "description": "A fashion model for a lookbook",
+      "imageUrl": "https://images.unsplash.com/photo-1627292441194-0280c19e74e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxmYXNoaW9uJTIwbW9kZWx8ZW58MHx8fHwxNzY1OTU2MDQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fashion model"
+    },
+    {
+      "id": "10",
+      "description": "Abstract art",
+      "imageUrl": "https://images.unsplash.com/photo-1622542796254-5b9c46ab0d2f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxhYnN0cmFjdCUyMGFydHxlbnwwfHx8fDE3NjU5MTY3NDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract art"
+    }
+  ]
 }
