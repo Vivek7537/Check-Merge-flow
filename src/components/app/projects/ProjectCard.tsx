@@ -11,6 +11,7 @@ import { Clock, Edit, Folder, Tag, User as UserIcon } from 'lucide-react';
 import { ProjectSheet } from './ProjectSheet';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
+import { cn } from '@/lib/utils';
 
 export default function ProjectCard({ project }: { project: Project }) {
   const [isSheetOpen, setSheetOpen] = useState(false);
@@ -19,6 +20,7 @@ export default function ProjectCard({ project }: { project: Project }) {
 
   const canEdit = user.role === 'Team Leader' || (user.role === 'Editor' && (project.editorId === user.name || project.status === 'New'));
   const editor = editors.find(e => e.id === project.editorId);
+  const isMyProject = project.editorId === user.name;
 
   const handleTakeProject = () => {
     if (user.role === 'Editor' && project.status === 'New') {
@@ -28,7 +30,10 @@ export default function ProjectCard({ project }: { project: Project }) {
 
   return (
     <>
-      <Card className="flex flex-col overflow-hidden h-full group transition-all hover:shadow-lg hover:-translate-y-1 duration-200">
+      <Card className={cn(
+        "flex flex-col overflow-hidden h-full group transition-all hover:shadow-lg hover:-translate-y-1 duration-200",
+        isMyProject && user.role === 'Editor' && "border-primary"
+      )}>
         <CardHeader className="p-0 relative">
           <Image
             src={project.imageUrl}

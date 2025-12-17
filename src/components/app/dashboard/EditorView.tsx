@@ -7,11 +7,15 @@ import ProjectCard from "../projects/ProjectCard";
 import { Project, ProjectStatus } from "@/lib/types";
 import StatsCards from "./StatsCards";
 import { isDelayed } from "@/lib/utils";
-import { Briefcase, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { Briefcase, CheckCircle, Clock, AlertTriangle, PlusCircle } from 'lucide-react';
+import { ProjectSheet } from "../projects/ProjectSheet";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function EditorView() {
   const { user } = useAuth();
   const { projects } = useData();
+  const [isSheetOpen, setSheetOpen] = useState(false);
 
   const myProjects = projects.filter(p => p.editorId === user.name);
 
@@ -52,6 +56,16 @@ export default function EditorView() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div className="flex-1"></div>
+        {user.role === 'Team Leader' && (
+            <Button size="sm" onClick={() => setSheetOpen(true)}>
+              <PlusCircle className="mr-2 h-4 w-4"/>
+              Add Project
+            </Button>
+        )}
+      </div>
+
       <StatsCards stats={stats} />
       <Tabs defaultValue="active">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
@@ -73,6 +87,7 @@ export default function EditorView() {
           {renderProjectList(allMyProjects, "No projects found.")}
         </TabsContent>
       </Tabs>
+      <ProjectSheet open={isSheetOpen} onOpenChange={setSheetOpen} />
     </div>
   );
 }
