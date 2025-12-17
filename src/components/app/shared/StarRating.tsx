@@ -15,11 +15,11 @@ export default function StarRating({ rating, maxStars = 5 }: StarRatingProps) {
   return (
     <div className="flex items-center gap-0.5" aria-label={`Rating: ${rating} out of ${maxStars} stars`}>
       {[...Array(fullStars)].map((_, i) => (
-        <Star key={`full-${i}`} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+        <Star key={`full-${i}`} className="h-4 w-4 text-primary fill-primary" />
       ))}
-      {hasHalfStar && <StarHalf key="half" className="h-4 w-4 text-yellow-400 fill-yellow-400" />}
+      {hasHalfStar && <StarHalf key="half" className="h-4 w-4 text-primary fill-primary" />}
       {[...Array(emptyStars)].map((_, i) => (
-        <Star key={`empty-${i}`} className="h-4 w-4 text-gray-300 fill-gray-300" />
+        <Star key={`empty-${i}`} className="h-4 w-4 text-muted-foreground/20 fill-muted-foreground/20" />
       ))}
     </div>
   );
