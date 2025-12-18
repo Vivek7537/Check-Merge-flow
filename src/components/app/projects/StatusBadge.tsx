@@ -1,8 +1,8 @@
+
 "use client";
 
-import { cn, getStatusColor } from "@/lib/utils";
-import { ProjectStatus } from "@/lib/types";
-import { differenceInDays } from "date-fns";
+import { cn, getStatusColor, getDisplayStatus } from "@/lib/utils";
+import { Project, ProjectStatus } from "@/lib/types";
 
 type StatusBadgeProps = {
   status: ProjectStatus;
@@ -12,8 +12,8 @@ type StatusBadgeProps = {
 
 export default function StatusBadge({ status, deadline, className }: StatusBadgeProps) {
   const now = new Date();
-  let displayStatus = status;
-  if (status !== 'Done' && deadline && differenceInDays(now, new Date(deadline)) > 0) {
+  let displayStatus: ProjectStatus | 'Delayed' = status;
+  if (status !== 'Done' && deadline && now > new Date(deadline)) {
     displayStatus = 'Delayed';
   }
 
@@ -22,12 +22,12 @@ export default function StatusBadge({ status, deadline, className }: StatusBadge
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize",
+        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize",
         colorClasses,
         className
       )}
     >
-      <span className={cn("w-2 h-2 mr-2 rounded-full bg-current")} />
+      <span className={cn("w-2 h-2 mr-2 rounded-full", displayStatus === 'Delayed' ? 'bg-red-500' : 'bg-current')} />
       {displayStatus}
     </div>
   );
