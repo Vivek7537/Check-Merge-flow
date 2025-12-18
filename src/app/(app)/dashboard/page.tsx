@@ -46,7 +46,7 @@ export default function DashboardPage() {
 
   const myProjects = projects.filter(p => p.editorId === user.name);
   const newProjects = projects.filter(p => p.status === "New");
-  const otherProjects = projects.filter(p => p.status === 'New' || (p.editorId && p.editorId !== user.name));
+  const otherProjects = projects.filter(p => (p.status === 'New' || p.status === 'Assigned') && p.editorId !== user.name);
 
   const stats = [
     { title: 'Total Projects', value: projects.length, icon: Grid },
