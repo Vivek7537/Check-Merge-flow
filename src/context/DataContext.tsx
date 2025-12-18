@@ -19,6 +19,9 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+const PROJECTS_KEY = 'mergeflow_projects';
+const IMAGES_KEY = 'mergeflow_images';
+
 export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [editors, setEditors] = useState<Editor[]>(initialEditors);
@@ -26,35 +29,58 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     try {
-        const storedProjects = localStorage.getItem('mergeflow_projects');
-        if (storedProjects) {
-            const parsedProjects = JSON.parse(storedProjects).map((p: any) => ({
-                ...p,
-                deadline: new Date(p.deadline),
-                creationDate: new Date(p.creationDate),
-                assignDate: p.assignDate ? new Date(p.assignDate) : null,
-                completionDate: p.completionDate ? new Date(p.completionDate) : null,
-            }));
-            setProjects(parsedProjects);
-        } else {
-            setProjects(initialProjects);
-        }
+      const storedProjectsJSON = localStorage.getItem(PROJECTS_KEY);
+      const storedImagesJSON = sessionStorage.getItem(IMAGES_KEY);
+
+      let projectsToLoad: Project[] = initialProjects;
+
+      if (storedProjectsJSON) {
+        const storedProjects = JSON.parse(storedProjectsJSON);
+        const storedImages = storedImagesJSON ? JSON.parse(storedImagesJSON) : {};
+
+        projectsToLoad = storedProjects.map((p: any) => ({
+            ...p,
+            imageUrl: storedImages[p.id] || p.imageUrl,
+            deadline: new Date(p.deadline),
+            creationDate: new Date(p.creationDate),
+            assignDate: p.assignDate ? new Date(p.assignDate) : null,
+            completionDate: p.completionDate ? new Date(p.completionDate) : null,
+        }));
+      }
+      setProjects(projectsToLoad);
     } catch (error) {
-        console.error("Failed to parse projects from localStorage, using initial data.", error);
+        console.error("Failed to parse projects from storage, using initial data.", error);
         setProjects(initialProjects);
     }
   }, []);
 
   useEffect(() => {
-    // Persist projects to localStorage
+    // Persist projects to localStorage, but without imageUrl
     if (projects.length > 0) {
       try {
-        localStorage.setItem('mergeflow_projects', JSON.stringify(projects));
+        const projectsForStorage = projects.map(({ imageUrl, ...rest }) => rest);
+        const imageCache = projects.reduce((acc, p) => {
+          if (p.imageUrl.startsWith('data:')) {
+            acc[p.id] = p.imageUrl;
+          }
+          return acc;
+        }, {} as Record<string, string>);
+        
+        localStorage.setItem(PROJECTS_KEY, JSON.stringify(projectsForStorage));
+        sessionStorage.setItem(IMAGES_KEY, JSON.stringify(imageCache));
+
       } catch (error) {
-        console.error("Failed to save projects to localStorage", error);
+        console.error("Failed to save projects to storage", error);
+        if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+             toast({
+                variant: "destructive",
+                title: "Storage Full",
+                description: "Could not save all image data. Please clear some projects or upload smaller images.",
+            });
+        }
       }
     }
-  }, [projects]);
+  }, [projects, toast]);
 
 
   useEffect(() => {
@@ -100,7 +126,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const resetData = () => {
-    localStorage.removeItem('mergeflow_projects');
+    localStorage.removeItem(PROJECTS_KEY);
+    sessionStorage.removeItem(IMAGES_KEY);
     setProjects(initialProjects);
     toast({ title: "Data Reset", description: "All project data has been reset to the initial state." });
   };
