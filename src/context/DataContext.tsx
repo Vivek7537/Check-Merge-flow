@@ -11,7 +11,7 @@ interface DataContextType {
   projects: Project[];
   editors: Editor[];
   updateProject: (projectId: string, updatedData: Partial<Project>) => void;
-  addProject: (newProject: Omit<Project, 'id'>) => void;
+  addProject: (newProject: Omit<Project, 'id' | 'category' | 'picturesEdited'>) => void;
   deleteProject: (projectId: string) => void;
   getProjectById: (projectId: string) => Project | undefined;
   resetData: () => void;
@@ -60,7 +60,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       try {
         const projectsForStorage = projects.map(({ imageUrl, ...rest }) => rest);
         const imageCache = projects.reduce((acc, p) => {
-          if (p.imageUrl.startsWith('data:')) {
+          if (p.imageUrl && p.imageUrl.startsWith('data:')) {
             acc[p.id] = p.imageUrl;
           }
           return acc;
@@ -108,11 +108,13 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
-  const addProject = (newProjectData: Omit<Project, 'id'>) => {
+  const addProject = (newProjectData: Omit<Project, 'id' | 'category' | 'picturesEdited'>) => {
     const newIdNumber = (projects[0] ? parseInt(projects[0].id.split('-')[1]) : 0) + 1;
     const newProject: Project = {
       ...newProjectData,
       id: `PROJ-${String(newIdNumber).padStart(3, '0')}`,
+      category: "Personal", // default value
+      picturesEdited: 0, // default value
     };
     setProjects(prevProjects => [newProject, ...prevProjects].sort((a,b) => b.id.localeCompare(a.id)));
   };
