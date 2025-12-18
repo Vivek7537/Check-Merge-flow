@@ -113,6 +113,49 @@ export default function DashboardPage() {
         </div>
       </header>
 
+       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="lg:col-span-1">
+          <CardHeader>
+            <CardTitle>Editor Ratings</CardTitle>
+            <CardDescription>Live ratings based on performance.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Editor</TableHead>
+                  <TableHead className="text-right">Rating</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {editors.map((editor) => (
+                  <TableRow key={editor.id}>
+                    <TableCell className="font-medium flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage
+                          src={`https://api.dicebear.com/8.x/initials/svg?seed=${editor.name}`}
+                          alt={editor.name}
+                        />
+                        <AvatarFallback>
+                          {getInitials(editor.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      {editor.name}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <StarRating rating={editor.rating} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+        <div className="lg:col-span-2">
+            <EditorPerformanceCharts />
+        </div>
+      </div>
+
       {user.role === 'Team Leader' && (
          <StatsCards stats={teamLeaderStats} />
       )}
@@ -162,48 +205,6 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Editor Ratings</CardTitle>
-            <CardDescription>Live ratings based on performance.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Editor</TableHead>
-                  <TableHead className="text-right">Rating</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {editors.map((editor) => (
-                  <TableRow key={editor.id}>
-                    <TableCell className="font-medium flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={`https://api.dicebear.com/8.x/initials/svg?seed=${editor.name}`}
-                          alt={editor.name}
-                        />
-                        <AvatarFallback>
-                          {getInitials(editor.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      {editor.name}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <StarRating rating={editor.rating} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-        <div className="lg:col-span-2">
-            <EditorPerformanceCharts />
-        </div>
-      </div>
       <ProjectSheet open={isSheetOpen} onOpenChange={setSheetOpen} />
     </div>
   );
