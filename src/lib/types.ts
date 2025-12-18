@@ -34,11 +34,12 @@ export interface Project {
   deadline: Date;
   completionDate: Date | null;
   notes: string;
-  idCaller: string;
+  telecallerName: string;
   imageUrl: string;
   imageHint: string;
   category: ProjectCategory;
   picturesEdited?: number;
+  creationDate: Date;
 }
 
 export interface Editor {

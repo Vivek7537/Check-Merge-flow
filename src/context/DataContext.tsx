@@ -31,6 +31,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         deadline: new Date(p.deadline),
         assignDate: p.assignDate ? new Date(p.assignDate) : null,
         completionDate: p.completionDate ? new Date(p.completionDate) : null,
+        creationDate: p.creationDate ? new Date(p.creationDate) : new Date(),
       })) : initialProjects;
       
       const editorsData = storedEditors ? JSON.parse(storedEditors) : initialEditors;

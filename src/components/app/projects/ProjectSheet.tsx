@@ -56,7 +56,7 @@ import { useRef } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Project name must be at least 2 characters." }),
-  idCaller: z.string().min(1, { message: "ID Caller is required." }),
+  telecallerName: z.string().min(1, { message: "Telecaller Name is required." }),
   deadline: z.date({ required_error: "A deadline is required." }),
   notes: z.string().optional(),
   imageUrl: z.string().min(1, { message: "An image is required." }),
@@ -86,7 +86,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: project?.name || "",
-      idCaller: project?.idCaller || "",
+      telecallerName: project?.telecallerName || "",
       deadline: project ? new Date(project.deadline) : new Date(),
       notes: project?.notes || "",
       imageUrl: project?.imageUrl || "",
@@ -113,6 +113,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
     try {
         const projectData = {
           ...values,
+          creationDate: project?.creationDate || new Date(),
           assignDate: values.editorId ? (project?.assignDate || new Date()) : null,
           completionDate: values.status === 'Done' ? (project?.completionDate || new Date()) : null,
         }
@@ -215,12 +216,12 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
             />
             <FormField
               control={form.control}
-              name="idCaller"
+              name="telecallerName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ID Caller</FormLabel>
+                  <FormLabel>Telecaller Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., CLIENT-XYZ" {...field} disabled={!canEdit} />
+                    <Input placeholder="e.g., Jane Doe" {...field} disabled={!canEdit} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

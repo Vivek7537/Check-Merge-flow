@@ -80,7 +80,7 @@ export default function DashboardPage() {
         {user.role === "Team Leader" && (
           <Button onClick={() => setSheetOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Project
+            New Project
           </Button>
         )}
       </header>
