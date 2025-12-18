@@ -37,6 +37,7 @@ export default function DashboardPage() {
   
   const otherProjects = projects.filter(p => ['New', 'Assigned'].includes(p.status));
 
+
   const teamLeaderStats = [
     { title: 'Total Projects', value: projects.length, icon: Grid },
     { title: 'In Progress', value: projects.filter(p => p.status === 'In Progress').length, icon: Clock },
