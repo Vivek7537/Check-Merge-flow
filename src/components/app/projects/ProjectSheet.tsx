@@ -113,6 +113,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
     try {
         const projectData = {
           ...values,
+          editorId: values.editorId === "unassigned" ? null : values.editorId,
           creationDate: project?.creationDate || new Date(),
           assignDate: values.editorId ? (project?.assignDate || new Date()) : null,
           completionDate: values.status === 'Done' ? (project?.completionDate || new Date()) : null,
@@ -278,14 +279,14 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Assigned Editor</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""} disabled={!canEdit}>
+                    <Select onValueChange={field.onChange} value={field.value || "unassigned"} disabled={!canEdit}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Assign an editor" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Unassigned</SelectItem>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
                         {editors.map(editor => (
                           <SelectItem key={editor.id} value={editor.id}>{editor.name}</SelectItem>
                         ))}
