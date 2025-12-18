@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
+import Image from 'next/image';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -102,11 +104,9 @@ export default function ProjectsTable({ projects }: { projects: Project[] }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead onClick={() => handleSort('id')} className="cursor-pointer">
-                ID {renderSortArrow('id')}
-              </TableHead>
+              <TableHead className="w-[100px]">Project</TableHead>
               <TableHead onClick={() => handleSort('name')} className="cursor-pointer">
-                Project Name {renderSortArrow('name')}
+                Details {renderSortArrow('name')}
               </TableHead>
               <TableHead>Status</TableHead>
               <TableHead onClick={() => handleSort('editorName')} className="cursor-pointer">
@@ -121,8 +121,20 @@ export default function ProjectsTable({ projects }: { projects: Project[] }) {
           <TableBody>
             {sortedAndFilteredProjects.map(project => (
               <TableRow key={project.id}>
-                <TableCell className="font-mono text-xs">{project.id}</TableCell>
-                <TableCell className="font-medium">{project.name}</TableCell>
+                <TableCell>
+                  <Image
+                    src={project.imageUrl}
+                    alt={project.name}
+                    width={80}
+                    height={50}
+                    className="rounded-md object-cover"
+                    data-ai-hint={project.imageHint}
+                  />
+                </TableCell>
+                <TableCell>
+                    <div className="font-medium">{project.name}</div>
+                    <div className="font-mono text-xs text-muted-foreground">{project.id}</div>
+                </TableCell>
                 <TableCell>
                   <StatusBadge status={project.status} deadline={project.deadline} />
                 </TableCell>
