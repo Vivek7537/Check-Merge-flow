@@ -64,8 +64,6 @@ const formSchema = z.object({
   imageHint: z.string().optional(),
   editorId: z.string().nullable(),
   status: z.enum(ProjectStatuses),
-  category: z.enum(ProjectCategories),
-  picturesEdited: z.coerce.number().int().min(0).optional(),
 });
 
 type ProjectSheetProps = {
@@ -97,8 +95,6 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
       imageHint: project?.imageHint || "random",
       editorId: project?.editorId || null,
       status: project?.status || "New",
-      category: project?.category || "Personal",
-      picturesEdited: project?.picturesEdited || 0,
     },
   });
 
@@ -117,6 +113,8 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
     try {
         const projectData = {
           ...values,
+          category: project?.category || "Personal",
+          picturesEdited: project?.picturesEdited || 0,
           editorId: values.editorId === "unassigned" ? null : values.editorId,
           creationDate: project?.creationDate || new Date(),
           assignDate: values.editorId ? (project?.assignDate || new Date()) : null,
@@ -256,20 +254,36 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
               />
               <FormField
                 control={form.control}
-                name="category"
+                name="deadline"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!canEdit}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {ProjectCategories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Deadline</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                            disabled={!canEdit}
+                          >
+                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date("1900-01-01") || !canEdit}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -295,57 +309,6 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="deadline"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Deadline</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                          disabled={!canEdit}
-                        >
-                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date < new Date("1900-01-01") || !canEdit}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="picturesEdited"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Pictures Edited</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="e.g., 250" {...field} onChange={e => field.onChange(+e.target.value)} disabled={!canEdit} />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -403,3 +366,5 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
     </Sheet>
   );
 }
+
+    
