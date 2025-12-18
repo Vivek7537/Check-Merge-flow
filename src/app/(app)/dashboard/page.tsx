@@ -186,7 +186,7 @@ export default function DashboardPage() {
                 {user.role === 'Editor' ? "Projects that are new or assigned to other editors." : "Manage and track all ongoing and completed projects."}
               </CardDescription>
             </div>
-          </Header>
+          </CardHeader>
           <CardContent>
             <ProjectsTable projects={user.role === 'Editor' ? otherProjects : projects} />
           </CardContent>
