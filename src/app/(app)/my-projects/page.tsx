@@ -50,6 +50,9 @@ export default function MyProjectsPage() {
           <TabsTrigger value="completed">Completed</TabsTrigger>
           <TabsTrigger value="delayed">Delayed</TabsTrigger>
         </TabsList>
+        <TabsContent value="all" className="mt-6">
+          {renderProjectGrid(myProjects, "You have not been assigned any projects yet.")}
+        </TabsContent>
         <TabsContent value="active" className="mt-6">
           {renderProjectGrid(activeProjects, "You have no active projects.")}
         </TabsContent>
@@ -58,9 +61,6 @@ export default function MyProjectsPage() {
         </TabsContent>
         <TabsContent value="delayed" className="mt-6">
           {renderProjectGrid(delayedProjects, "No delayed projects. Great work!")}
-        </TabsContent>
-        <TabsContent value="all" className="mt-6">
-          {renderProjectGrid(myProjects, "You have not been assigned any projects yet.")}
         </TabsContent>
       </Tabs>
     </div>
