@@ -10,6 +10,7 @@ interface DataContextType {
   editors: Editor[];
   updateProject: (projectId: string, updatedData: Partial<Project>) => void;
   addProject: (newProject: Omit<Project, 'id'>) => void;
+  deleteProject: (projectId: string) => void;
   getProjectById: (projectId: string) => Project | undefined;
 }
 
@@ -55,7 +56,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     // Recalculate editor ratings whenever projects change
     if (projects.length === 0 || editors.length === 0) return;
     
-    const updatedEditors = editors.map(editor => {
+    const updatedEditors = initialEditors.map(editor => {
       const editorProjects = projects.filter(p => p.editorId === editor.id);
       const newRating = calculateEditorRating(editorProjects);
       return { ...editor, rating: newRating };
@@ -83,13 +84,17 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     setProjects(prevProjects => [newProject, ...prevProjects].sort((a,b) => b.id.localeCompare(a.id)));
   };
 
+  const deleteProject = (projectId: string) => {
+    setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
+  }
+
   const getProjectById = (projectId: string): Project | undefined => {
     return projects.find(p => p.id === projectId);
   };
 
 
   return (
-    <DataContext.Provider value={{ projects, editors, updateProject, addProject, getProjectById }}>
+    <DataContext.Provider value={{ projects, editors, updateProject, addProject, deleteProject, getProjectById }}>
       {children}
     </DataContext.Provider>
   );

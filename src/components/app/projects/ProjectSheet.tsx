@@ -34,20 +34,32 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Trash2, Upload } from "lucide-react";
 import { format } from "date-fns";
 import { useData } from "@/context/DataContext";
 import { useAuth } from "@/context/AuthContext";
 import { Project, ProjectStatuses, ProjectCategories } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useRef } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Project name must be at least 2 characters." }),
   idCaller: z.string().min(1, { message: "ID Caller is required." }),
   deadline: z.date({ required_error: "A deadline is required." }),
   notes: z.string().optional(),
-  imageUrl: z.string().url({ message: "Please enter a valid image URL." }),
+  imageUrl: z.string().min(1, { message: "An image is required." }),
   imageHint: z.string().optional(),
   editorId: z.string().nullable(),
   status: z.enum(ProjectStatuses),
@@ -62,9 +74,10 @@ type ProjectSheetProps = {
 };
 
 export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps) {
-  const { addProject, updateProject, editors } = useData();
+  const { addProject, updateProject, deleteProject, editors } = useData();
   const { user } = useAuth();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditMode = !!project;
   const canEdit = user.role === 'Team Leader' || (user.role === 'Editor' && (project?.editorId === user.name || !project));
@@ -76,7 +89,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
       idCaller: project?.idCaller || "",
       deadline: project ? new Date(project.deadline) : new Date(),
       notes: project?.notes || "",
-      imageUrl: project?.imageUrl || "https://picsum.photos/seed/11/600/400",
+      imageUrl: project?.imageUrl || "",
       imageHint: project?.imageHint || "random",
       editorId: project?.editorId || null,
       status: project?.status || "New",
@@ -84,6 +97,17 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
       picturesEdited: project?.picturesEdited || 0,
     },
   });
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        form.setValue('imageUrl', reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -111,6 +135,21 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
     }
   }
 
+  const handleDelete = () => {
+    if (!project) return;
+    try {
+      deleteProject(project.id);
+      toast({ title: "Project Deleted", description: `"${project.name}" has been deleted.` });
+      onOpenChange(false);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: "Could not delete the project. Please try again.",
+      });
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-xl w-full overflow-y-auto">
@@ -122,22 +161,45 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
         </SheetHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-6">
-            <div className="relative h-48 w-full rounded-md overflow-hidden">
-                <Image src={form.watch('imageUrl')} alt="Project image preview" layout="fill" objectFit="cover" data-ai-hint={form.watch('imageHint')} />
-            </div>
-             <FormField
-                control={form.control}
-                name="imageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Image URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://picsum.photos/seed/1/600/400" {...field} disabled={!canEdit} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project Image</FormLabel>
+                  <FormControl>
+                    <div>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        disabled={!canEdit}
+                      />
+                      {field.value ? (
+                         <div className="relative h-48 w-full rounded-md overflow-hidden group">
+                           <Image src={field.value} alt="Project image preview" layout="fill" objectFit="cover" />
+                           {canEdit && (
+                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                               <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                                 <Upload className="mr-2 h-4 w-4" /> Change Image
+                               </Button>
+                             </div>
+                           )}
+                         </div>
+                      ) : (
+                        <Button type="button" variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()} disabled={!canEdit}>
+                          <Upload className="mr-2 h-4 w-4" /> Upload Image
+                        </Button>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <FormField
               control={form.control}
               name="name"
@@ -215,7 +277,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Assigned Editor</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value || ""} disabled={!canEdit}>
+                    <Select onValueChange={field.onChange} value={field.value || ""} disabled={!canEdit}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Assign an editor" />
@@ -278,7 +340,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
                 <FormItem>
                   <FormLabel>Pictures Edited</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="e.g., 250" {...field} disabled={!canEdit} />
+                    <Input type="number" placeholder="e.g., 250" {...field} onChange={e => field.onChange(+e.target.value)} disabled={!canEdit} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -299,11 +361,37 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
               )}
             />
             
-            <SheetFooter>
-                <SheetClose asChild>
-                    <Button type="button" variant="outline">Cancel</Button>
-                </SheetClose>
-                {canEdit && <Button type="submit">{isEditMode ? "Save Changes" : "Create Project"}</Button>}
+            <SheetFooter className="sm:justify-between">
+                <div>
+                {isEditMode && user.role === 'Team Leader' && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button type="button" variant="destructive" className="mr-auto">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete Project
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the project "{project.name}".
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                )}
+                </div>
+                <div className="flex gap-2">
+                    <SheetClose asChild>
+                        <Button type="button" variant="outline">Cancel</Button>
+                    </SheetClose>
+                    {canEdit && <Button type="submit">{isEditMode ? "Save Changes" : "Create Project"}</Button>}
+                </div>
             </SheetFooter>
           </form>
         </Form>

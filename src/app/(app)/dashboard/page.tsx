@@ -26,6 +26,7 @@ import { ProjectSheet } from "@/components/app/projects/ProjectSheet";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { isDelayed } from "@/lib/utils";
+import ProjectCard from "@/components/app/projects/ProjectCard";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -55,17 +56,67 @@ export default function DashboardPage() {
       .join("")
       .toUpperCase();
 
+  const myProjects =
+    user.role === "Editor"
+      ? projects.filter((p) => p.editorId === user.name)
+      : [];
+  const newProjects = projects.filter((p) => p.status === "New");
+  const otherProjects =
+    user.role === "Editor"
+      ? projects.filter((p) => p.editorId !== user.name && p.status !== "New")
+      : projects;
+
   return (
     <div className="space-y-6">
-       <header>
-        <h1 className="text-3xl font-bold font-headline tracking-tight">
-          Dashboard
-        </h1>
-        <p className="text-muted-foreground">
-          Welcome back, {user.name}. Here's what's happening.
-        </p>
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold font-headline tracking-tight">
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Welcome back, {user.name}. Here's what's happening.
+          </p>
+        </div>
+        {user.role === "Team Leader" && (
+          <Button onClick={() => setSheetOpen(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Project
+          </Button>
+        )}
       </header>
+
       <StatsCards stats={stats} />
+
+      {user.role === "Editor" && (
+        <>
+          {myProjects.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold font-headline mb-4">
+                My Active Projects
+              </h2>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {myProjects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {newProjects.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold font-headline mb-4">
+                New Available Projects
+              </h2>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {newProjects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="lg:col-span-1">
           <CardHeader>
@@ -89,7 +140,9 @@ export default function DashboardPage() {
                           src={`https://api.dicebear.com/8.x/initials/svg?seed=${editor.name}`}
                           alt={editor.name}
                         />
-                        <AvatarFallback>{getInitials(editor.name)}</AvatarFallback>
+                        <AvatarFallback>
+                          {getInitials(editor.name)}
+                        </AvatarFallback>
                       </Avatar>
                       {editor.name}
                     </TableCell>
@@ -110,15 +163,11 @@ export default function DashboardPage() {
                 Manage and track all ongoing and completed projects.
               </CardDescription>
             </div>
-            {user.role === 'Team Leader' && (
-              <Button size="sm" onClick={() => setSheetOpen(true)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Project
-              </Button>
-            )}
           </CardHeader>
           <CardContent>
-            <ProjectsTable projects={projects} />
+            <ProjectsTable
+              projects={user.role === "Editor" ? otherProjects : projects}
+            />
           </CardContent>
         </Card>
       </div>
