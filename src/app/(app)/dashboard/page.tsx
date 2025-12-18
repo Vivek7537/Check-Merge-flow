@@ -32,32 +32,38 @@ export default function DashboardPage() {
 
   const loggedInEditor = editors.find(e => e.name === user.name);
   
-  const newProjects = projects.filter(p => p.status === "New");
+  const getUniqueProjects = (projectList: Project[]) => {
+    return Array.from(new Set(projectList.map(p => p.id)))
+      .map(id => projectList.find(p => p.id === id)!);
+  }
+
+  const newProjects = getUniqueProjects(projects.filter(p => p.status === "New"));
   
-  const otherProjects = projects.filter(p => ['New', 'Assigned'].includes(p.status));
+  const otherProjects = getUniqueProjects(projects.filter(p => ['New', 'Assigned'].includes(p.status)));
+  const allProjects = getUniqueProjects(projects);
 
   const teamLeaderStats = [
-    { title: 'Total Projects', value: projects.length, icon: Grid },
-    { title: 'In Progress', value: projects.filter(p => p.status === 'In Progress').length, icon: Clock },
-    { title: 'Completed', value: projects.filter(p => p.status === 'Done').length, icon: CheckCircle },
-    { title: 'Delayed', value: projects.filter(p => isDelayed(p) && p.status !== 'Done').length, icon: AlertTriangle },
+    { title: 'Total Projects', value: allProjects.length, icon: Grid },
+    { title: 'In Progress', value: allProjects.filter(p => p.status === 'In Progress').length, icon: Clock },
+    { title: 'Completed', value: allProjects.filter(p => p.status === 'Done').length, icon: CheckCircle },
+    { title: 'Delayed', value: allProjects.filter(p => isDelayed(p) && p.status !== 'Done').length, icon: AlertTriangle },
   ];
 
-  const myProjects = loggedInEditor ? projects.filter(p => p.editorId === loggedInEditor.id) : [];
+  const myProjects = loggedInEditor ? allProjects.filter(p => p.editorId === loggedInEditor.id) : [];
   const myCompletedProjects = myProjects.filter(p => p.status === 'Done');
   const myDelayedProjects = myProjects.filter(p => isDelayed(p) && p.status !== 'Done');
   const totalPicturesEdited = myCompletedProjects.reduce((acc, p) => acc + (p.picturesEdited || 0), 0);
   
   const now = new Date();
-  const urgentProjects = projects.filter(p => 
+  const urgentProjects = getUniqueProjects(allProjects.filter(p => 
       p.status !== 'Done' && 
       isFuture(p.deadline) &&
       differenceInDays(p.deadline, now) <= 3
-  );
+  ));
 
-  const recentlyAssignedProjects = projects
+  const recentlyAssignedProjects = getUniqueProjects(allProjects
     .filter(p => p.status === 'Assigned' && p.assignDate)
-    .sort((a, b) => new Date(b.assignDate!).getTime() - new Date(a.assignDate!).getTime());
+    .sort((a, b) => new Date(b.assignDate!).getTime() - new Date(a.assignDate!).getTime()));
 
   const editorStats = [
     { title: 'My Active Projects', value: myProjects.filter(p => ['In Progress', 'Assigned'].includes(p.status)).length, icon: Clock },
@@ -68,8 +74,7 @@ export default function DashboardPage() {
 
 
   const renderProjects = (projectList: Project[]) => {
-    const uniqueProjects = Array.from(new Set(projectList.map(p => p.id)))
-      .map(id => projectList.find(p => p.id === id)!);
+    const uniqueProjects = getUniqueProjects(projectList);
 
     if (viewMode === 'table') {
         return <ProjectsTable projects={uniqueProjects} />;
@@ -226,7 +231,7 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-             {renderProjects(user.role === 'Editor' ? otherProjects : projects)}
+             {renderProjects(user.role === 'Editor' ? otherProjects : allProjects)}
           </CardContent>
         </Card>
       </div>
