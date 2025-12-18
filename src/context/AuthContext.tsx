@@ -6,7 +6,8 @@ import { User, UserRole } from '@/lib/types';
 import { initialEditors } from '@/lib/data';
 import { Editor } from '@/lib/types';
 
-const USER_PASS = "password123";
+const EDITOR_PASS = "8528";
+const TEAMLEADER_PASS = "1116";
 
 interface AuthContextType {
   user: User;
@@ -34,8 +35,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (name: string, password: string, role: UserRole): boolean => {
-    // This is a simplified login. In a real app, you'd check against a database.
-    if (password === USER_PASS) {
+    let isValid = false;
+    if (role === 'Editor' && password === EDITOR_PASS) {
+      isValid = true;
+    } else if (role === 'Team Leader' && password === TEAMLEADER_PASS) {
+      isValid = true;
+    }
+    
+    if (isValid) {
       const newUser = { isAuthenticated: true, role: role, name: name };
       setUser(newUser);
       sessionStorage.setItem('mergeflow_user', JSON.stringify(newUser));
