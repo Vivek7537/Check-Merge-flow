@@ -50,7 +50,7 @@ export default function DashboardPage() {
 
   const newProjects = projects.filter(p => p.status === "New");
   
-  const otherProjectsRaw = projects.filter(p => (p.status === 'New' || p.status === 'Assigned') && p.editorId !== loggedInEditor?.id);
+  const otherProjectsRaw = projects.filter(p => (p.status === 'New' || p.status === 'Assigned'));
   const otherProjects = otherProjectsRaw.filter((project, index, self) =>
     index === self.findIndex((p) => (
       p.id === project.id
