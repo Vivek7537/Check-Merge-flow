@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import { useData } from "@/context/DataContext";
 import { isDelayed } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -11,7 +12,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Editor, Project } from "@/lib/types";
+import { sub, isAfter } from 'date-fns';
 
 interface ChartData {
   name: string;
@@ -19,6 +28,8 @@ interface ChartData {
   inProgress: number;
   delayed: number;
 }
+
+type TimeRange = 'all' | 'week' | 'month' | 'year';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -34,12 +45,37 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const getPerformanceData = (editors: Editor[], projects: Project[]): ChartData[] => {
+const getPerformanceData = (editors: Editor[], projects: Project[], timeRange: TimeRange): ChartData[] => {
+  const now = new Date();
+  let startDate: Date;
+
+  switch (timeRange) {
+    case 'week':
+      startDate = sub(now, { weeks: 1 });
+      break;
+    case 'month':
+      startDate = sub(now, { months: 1 });
+      break;
+    case 'year':
+      startDate = sub(now, { years: 1 });
+      break;
+    case 'all':
+    default:
+      startDate = new Date(0); // A very old date to include all projects
+      break;
+  }
+
+  const filteredProjects = projects.filter(p => p.completionDate && isAfter(new Date(p.completionDate), startDate));
+
   return editors.map(editor => {
-    const editorProjects = projects.filter(p => p.editorId === editor.id);
+    const editorProjects = filteredProjects.filter(p => p.editorId === editor.id);
     const done = editorProjects.filter(p => p.status === 'Done').length;
-    const inProgress = editorProjects.filter(p => p.status === 'In Progress' || p.status === 'Assigned').length;
-    const delayed = editorProjects.filter(p => isDelayed(p) && p.status !== 'Done').length;
+    
+    // For "inProgress" and "delayed", we might want to show current state regardless of time filter
+    // So we use the original projects list for these counts.
+    const allEditorProjects = projects.filter(p => p.editorId === editor.id);
+    const inProgress = allEditorProjects.filter(p => ['In Progress', 'Assigned'].includes(p.status)).length;
+    const delayed = allEditorProjects.filter(p => isDelayed(p) && p.status !== 'Done').length;
     
     return {
       name: editor.name.split(' ')[0], // Use first name for brevity
@@ -52,13 +88,27 @@ const getPerformanceData = (editors: Editor[], projects: Project[]): ChartData[]
 
 export default function EditorPerformanceCharts() {
   const { editors, projects } = useData();
-  const chartData = getPerformanceData(editors, projects);
+  const [timeRange, setTimeRange] = useState<TimeRange>('all');
+  const chartData = getPerformanceData(editors, projects, timeRange);
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Editor Workload</CardTitle>
-        <CardDescription>Live overview of project distribution.</CardDescription>
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div>
+          <CardTitle>Editor Workload</CardTitle>
+          <CardDescription>Live overview of project distribution.</CardDescription>
+        </div>
+        <Select value={timeRange} onValueChange={(value: TimeRange) => setTimeRange(value)}>
+          <SelectTrigger className="w-full sm:w-[160px]">
+            <SelectValue placeholder="Select time range" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="week">Last 7 days</SelectItem>
+            <SelectItem value="month">Last 30 days</SelectItem>
+            <SelectItem value="year">Last Year</SelectItem>
+          </SelectContent>
+        </Select>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
