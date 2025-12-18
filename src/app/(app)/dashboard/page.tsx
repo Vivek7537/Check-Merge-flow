@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -102,7 +103,7 @@ export default function DashboardPage() {
             <div>
               <CardTitle>
                 {user.role === 'Editor' ? "Other Projects" : "All Projects"}
-              </captionTitle>
+              </CardTitle>
               <CardDescription>
                 {user.role === 'Editor' ? "Projects assigned to other editors." : "Manage and track all ongoing and completed projects."}
               </CardDescription>
