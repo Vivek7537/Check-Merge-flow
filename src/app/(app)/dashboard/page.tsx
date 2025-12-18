@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/DataContext";
 import {
@@ -14,13 +15,14 @@ import {
 import ProjectsTable from "@/components/app/projects/ProjectsTable";
 import { ProjectSheet } from "@/components/app/projects/ProjectSheet";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Grid, List, CheckCircle, Clock, Image, AlertTriangle } from "lucide-react";
+import { PlusCircle, Grid, List, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { Project } from "@/lib/types";
 import ProjectCard from "@/components/app/projects/ProjectCard";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import StatsCards from "@/components/app/dashboard/StatsCards";
 import { isDelayed } from "@/lib/utils";
 import EditorPerformanceCharts from "@/components/app/dashboard/EditorPerformanceCharts";
+import { differenceInDays, isFuture } from 'date-fns';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -45,7 +47,13 @@ export default function DashboardPage() {
   const myCompletedProjects = myProjects.filter(p => p.status === 'Done');
   const myDelayedProjects = myProjects.filter(p => isDelayed(p) && p.status !== 'Done');
   const totalPicturesEdited = myCompletedProjects.reduce((acc, p) => acc + (p.picturesEdited || 0), 0);
-  const pendingProjects = projects.filter(p => p.status === 'Pending by Customer');
+  
+  const now = new Date();
+  const urgentProjects = projects.filter(p => 
+      p.status !== 'Done' && 
+      isFuture(p.deadline) &&
+      differenceInDays(p.deadline, now) <= 3
+  );
 
 
   const editorStats = [
@@ -96,13 +104,13 @@ export default function DashboardPage() {
        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
          <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle>Pending Projects</CardTitle>
-            <CardDescription>Projects awaiting customer feedback.</CardDescription>
+            <CardTitle>Urgent Projects</CardTitle>
+            <CardDescription>Projects with a deadline in the next 3 days.</CardDescription>
           </CardHeader>
           <CardContent>
-             {pendingProjects.length > 0 ? (
+             {urgentProjects.length > 0 ? (
                 <div className="space-y-2">
-                  {pendingProjects.slice(0,5).map(project => (
+                  {urgentProjects.slice(0,5).map(project => (
                     <div key={project.id} className="flex items-center gap-3 text-sm">
                       <Image 
                         src={project.imageUrl} 
@@ -114,18 +122,20 @@ export default function DashboardPage() {
                       />
                       <div className="flex-1 truncate">
                         <p className="font-medium truncate">{project.name}</p>
-                        <p className="text-xs text-muted-foreground">{project.telecallerName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Due in {differenceInDays(project.deadline, now)} days
+                        </p>
                       </div>
                     </div>
                   ))}
-                  {pendingProjects.length > 5 && (
+                  {urgentProjects.length > 5 && (
                      <p className="text-xs text-muted-foreground pt-2">
-                        + {pendingProjects.length - 5} more...
+                        + {urgentProjects.length - 5} more...
                      </p>
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No projects are pending feedback.</p>
+                <p className="text-sm text-muted-foreground">No projects are due in the next 3 days.</p>
               )}
           </CardContent>
         </Card>
@@ -176,7 +186,7 @@ export default function DashboardPage() {
                 {user.role === 'Editor' ? "Projects that are new or assigned to other editors." : "Manage and track all ongoing and completed projects."}
               </CardDescription>
             </div>
-          </CardHeader>
+          </Header>
           <CardContent>
             <ProjectsTable projects={user.role === 'Editor' ? otherProjects : projects} />
           </CardContent>
