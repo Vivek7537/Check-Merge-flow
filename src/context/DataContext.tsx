@@ -40,7 +40,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
         projectsToLoad = storedProjects.map((p: any) => ({
             ...p,
-            imageUrl: storedImages[p.id] || p.imageUrl,
+            imageUrl: storedImages[p.id] || p.imageUrl || "https://picsum.photos/seed/placeholder/600/400",
             deadline: new Date(p.deadline),
             creationDate: new Date(p.creationDate),
             assignDate: p.assignDate ? new Date(p.assignDate) : null,
