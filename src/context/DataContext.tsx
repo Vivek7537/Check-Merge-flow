@@ -17,45 +17,15 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider = ({ children }: { children: ReactNode }) => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [editors, setEditors] = useState<Editor[]>([]);
-
-  useEffect(() => {
-    // Simulate loading data from localStorage to persist changes
-    try {
-      const storedProjects = localStorage.getItem('mergeflow_projects');
-      const storedEditors = localStorage.getItem('mergeflow_editors');
-      
-      const projectsData = storedProjects ? JSON.parse(storedProjects).map((p: any) => ({
-        ...p,
-        deadline: new Date(p.deadline),
-        assignDate: p.assignDate ? new Date(p.assignDate) : null,
-        completionDate: p.completionDate ? new Date(p.completionDate) : null,
-        creationDate: p.creationDate ? new Date(p.creationDate) : new Date(),
-      })) : initialProjects;
-      
-      const editorsData = storedEditors ? JSON.parse(storedEditors) : initialEditors;
-
-      setProjects(projectsData);
-      setEditors(editorsData);
-    } catch (e) {
-      console.error("Could not load data from localStorage", e);
-      setProjects(initialProjects);
-      setEditors(initialEditors);
-    }
-  }, []);
-
-  useEffect(() => {
-    // Persist projects to localStorage
-    if (projects.length > 0) {
-      localStorage.setItem('mergeflow_projects', JSON.stringify(projects));
-    }
-  }, [projects]);
-
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [editors, setEditors] = useState<Editor[]>(initialEditors);
 
   useEffect(() => {
     // Recalculate editor ratings whenever projects change
-    if (projects.length === 0 || editors.length === 0) return;
+    if (projects.length === 0) {
+        setEditors(initialEditors.map(e => ({...e, rating: 1})));
+        return;
+    };
     
     const updatedEditors = initialEditors.map(editor => {
       const editorProjects = projects.filter(p => p.editorId === editor.id);
@@ -63,7 +33,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       return { ...editor, rating: newRating };
     });
     setEditors(updatedEditors);
-    localStorage.setItem('mergeflow_editors', JSON.stringify(updatedEditors));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projects]);
 

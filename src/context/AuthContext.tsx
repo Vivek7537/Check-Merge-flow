@@ -21,14 +21,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User>({ isAuthenticated: false, role: null, name: null });
 
   useEffect(() => {
+    // Attempt to retrieve user from sessionStorage
     try {
-      const storedUser = localStorage.getItem('mergeflow_user');
+      const storedUser = sessionStorage.getItem('mergeflow_user');
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error("Failed to parse user from localStorage", error);
-      localStorage.removeItem('mergeflow_user');
+      console.error("Failed to parse user from sessionStorage", error);
+      sessionStorage.removeItem('mergeflow_user');
     }
   }, []);
 
@@ -36,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (role === 'Team Leader' && password === TEAM_LEADER_PASS) {
       const newUser = { isAuthenticated: true, role: 'Team Leader', name: 'Team Leader' };
       setUser(newUser);
-      localStorage.setItem('mergeflow_user', JSON.stringify(newUser));
+      sessionStorage.setItem('mergeflow_user', JSON.stringify(newUser));
       return true;
     }
     if (role === 'Editor' && password === EDITOR_PASS && name) {
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (editorExists) {
         const newUser = { isAuthenticated: true, role: 'Editor', name };
         setUser(newUser);
-        localStorage.setItem('mergeflow_user', JSON.stringify(newUser));
+        sessionStorage.setItem('mergeflow_user', JSON.stringify(newUser));
         return true;
       }
     }
@@ -54,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     const loggedOutUser = { isAuthenticated: false, role: null, name: null };
     setUser(loggedOutUser);
-    localStorage.removeItem('mergeflow_user');
+    sessionStorage.removeItem('mergeflow_user');
   };
 
   return (
