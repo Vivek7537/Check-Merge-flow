@@ -34,7 +34,14 @@ export default function ProjectsTable({ projects }: { projects: Project[] }) {
   }
 
   const sortedAndFilteredProjects = useMemo(() => {
-    let filtered = projects.filter(project =>
+    // Remove duplicates
+    const uniqueProjects = projects.filter((project, index, self) =>
+        index === self.findIndex((p) => (
+            p.id === project.id
+        ))
+    );
+
+    let filtered = uniqueProjects.filter(project =>
       project.name.toLowerCase().includes(filter.toLowerCase()) ||
       project.id.toLowerCase().includes(filter.toLowerCase()) ||
       getEditorName(project.editorId).toLowerCase().includes(filter.toLowerCase())
