@@ -15,7 +15,7 @@ import {
 import ProjectsTable from "@/components/app/projects/ProjectsTable";
 import { ProjectSheet } from "@/components/app/projects/ProjectSheet";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Grid, List, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { PlusCircle, Grid, List, CheckCircle, Clock, AlertTriangle, Camera } from "lucide-react";
 import { Project } from "@/lib/types";
 import ProjectCard from "@/components/app/projects/ProjectCard";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -61,17 +61,23 @@ export default function DashboardPage() {
     { title: 'My Active Projects', value: myProjects.filter(p => p.status === 'In Progress' || p.status === 'Assigned').length, icon: Clock },
     { title: 'My Completed Projects', value: myCompletedProjects.length, icon: CheckCircle },
     { title: 'My Delayed Projects', value: myDelayedProjects.length, icon: AlertTriangle },
-    { title: 'Total Pictures Edited', value: totalPicturesEdited, icon: Image },
+    { title: 'Total Pictures Edited', value: totalPicturesEdited, icon: Camera },
   ];
 
 
-  const renderProjects = (projectList: Project[], title: string) => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {projectList.map((project) => (
-        <ProjectCard key={project.id} project={project} />
-      ))}
-    </div>
-  );
+  const renderProjects = (projectList: Project[], title: string) => {
+    // Remove duplicates before rendering
+    const uniqueProjects = projectList.filter((project, index, self) =>
+        index === self.findIndex((p) => p.id === project.id)
+    );
+    return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {uniqueProjects.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+        ))}
+        </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -101,49 +107,52 @@ export default function DashboardPage() {
             </ToggleGroup>
         </div>
       </header>
-
-       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-         <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Urgent Projects</CardTitle>
-            <CardDescription>Projects with a deadline in the next 3 days.</CardDescription>
-          </CardHeader>
-          <CardContent>
-             {urgentProjects.length > 0 ? (
-                <div className="space-y-2">
-                  {urgentProjects.slice(0,5).map(project => (
-                    <div key={project.id} className="flex items-center gap-3 text-sm">
-                      <Image 
-                        src={project.imageUrl} 
-                        alt={project.name}
-                        width={40}
-                        height={30}
-                        className="rounded-md object-cover h-[30px]"
-                        data-ai-hint={project.imageHint}
-                      />
-                      <div className="flex-1 truncate">
-                        <p className="font-medium truncate">{project.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Due in {differenceInDays(project.deadline, now)} days
-                        </p>
-                      </div>
+        
+      {user.role === 'Team Leader' && (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+             <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle>Urgent Projects</CardTitle>
+                <CardDescription>Projects with a deadline in the next 3 days.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                 {urgentProjects.length > 0 ? (
+                    <div className="space-y-2">
+                      {urgentProjects.slice(0,5).map(project => (
+                        <div key={project.id} className="flex items-center gap-3 text-sm">
+                          <Image 
+                            src={project.imageUrl} 
+                            alt={project.name}
+                            width={40}
+                            height={30}
+                            className="rounded-md object-cover h-[30px]"
+                            data-ai-hint={project.imageHint}
+                          />
+                          <div className="flex-1 truncate">
+                            <p className="font-medium truncate">{project.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Due in {differenceInDays(project.deadline, now)} days
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                      {urgentProjects.length > 5 && (
+                         <p className="text-xs text-muted-foreground pt-2">
+                            + {urgentProjects.length - 5} more...
+                         </p>
+                      )}
                     </div>
-                  ))}
-                  {urgentProjects.length > 5 && (
-                     <p className="text-xs text-muted-foreground pt-2">
-                        + {urgentProjects.length - 5} more...
-                     </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No projects are due in the next 3 days.</p>
                   )}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No projects are due in the next 3 days.</p>
-              )}
-          </CardContent>
-        </Card>
-        <div className="lg:col-span-2">
-            <EditorPerformanceCharts />
+              </CardContent>
+            </Card>
+            <div className="lg:col-span-2">
+                <EditorPerformanceCharts />
+            </div>
         </div>
-      </div>
+      )}
+
 
       {user.role === 'Team Leader' && (
          <StatsCards stats={teamLeaderStats} />
@@ -151,6 +160,12 @@ export default function DashboardPage() {
        {user.role === 'Editor' && (
          <StatsCards stats={editorStats} />
       )}
+       {user.role === 'Editor' && (
+         <div className="lg:col-span-2">
+            <EditorPerformanceCharts />
+        </div>
+      )}
+
 
       {user.role === 'Editor' && newProjects.length > 0 && (
          <Card>
