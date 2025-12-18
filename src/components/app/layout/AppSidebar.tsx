@@ -15,10 +15,22 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/DataContext";
-import { LayoutDashboard, Users, PanelLeft } from "lucide-react";
+import { LayoutDashboard, Users, PanelLeft, RefreshCw, Trash2 } from "lucide-react";
 import Logo from "@/components/app/shared/Logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import StarRating from "../shared/StarRating";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -33,7 +45,7 @@ const getInitials = (name: string) =>
 
 export default function AppSidebar() {
   const { user } = useAuth();
-  const { editors } = useData();
+  const { editors, resetData } = useData();
   const pathname = usePathname();
 
   return (
@@ -91,6 +103,31 @@ export default function AppSidebar() {
 
         </SidebarContent>
         <SidebarFooter>
+            {user.role === 'Team Leader' && (
+              <div className="px-2 group-data-[collapsible=icon]:hidden">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                     <Button variant="destructive" className="w-full">
+                       <Trash2 className="mr-2 h-4 w-4" />
+                        Reset Data
+                      </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete all current project data and restore the application to its initial state.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => resetData()}>Reset Data</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <SidebarSeparator className="my-2" />
+              </div>
+            )}
              <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton tooltip={{ children: 'Toggle Sidebar' }} className="group-data-[collapsible=icon]:justify-center">

@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Project, Editor, ProjectStatus, ProjectCategory } from '@/lib/types';
 import { initialProjects, initialEditors } from '@/lib/data';
 import { calculateEditorRating } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface DataContextType {
   projects: Project[];
@@ -13,6 +14,7 @@ interface DataContextType {
   addProject: (newProject: Omit<Project, 'id'>) => void;
   deleteProject: (projectId: string) => void;
   getProjectById: (projectId: string) => Project | undefined;
+  resetData: () => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -20,6 +22,7 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [editors, setEditors] = useState<Editor[]>(initialEditors);
+  const { toast } = useToast();
 
   useEffect(() => {
     try {
@@ -95,10 +98,16 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const getProjectById = (projectId: string): Project | undefined => {
     return projects.find(p => p.id === projectId);
   };
+  
+  const resetData = () => {
+    localStorage.removeItem('mergeflow_projects');
+    setProjects(initialProjects);
+    toast({ title: "Data Reset", description: "All project data has been reset to the initial state." });
+  };
 
 
   return (
-    <DataContext.Provider value={{ projects, editors, updateProject, addProject, deleteProject, getProjectById }}>
+    <DataContext.Provider value={{ projects, editors, updateProject, addProject, deleteProject, getProjectById, resetData }}>
       {children}
     </DataContext.Provider>
   );
