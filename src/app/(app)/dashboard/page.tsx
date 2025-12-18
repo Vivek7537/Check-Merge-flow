@@ -46,7 +46,7 @@ export default function DashboardPage() {
 
   const myProjects = projects.filter(p => p.editorId === user.name);
   const newProjects = projects.filter(p => p.status === "New");
-  const otherProjects = projects.filter(p => p.editorId && p.editorId !== user.name);
+  const otherProjects = projects.filter(p => p.status === 'New' || (p.editorId && p.editorId !== user.name));
 
   const stats = [
     { title: 'Total Projects', value: projects.length, icon: Grid },
@@ -128,7 +128,7 @@ export default function DashboardPage() {
                 {user.role === 'Editor' ? "Other Projects" : "All Projects"}
               </CardTitle>
               <CardDescription>
-                {user.role === 'Editor' ? "Projects assigned to other editors." : "Manage and track all ongoing and completed projects."}
+                {user.role === 'Editor' ? "Projects that are new or assigned to other editors." : "Manage and track all ongoing and completed projects."}
               </CardDescription>
             </div>
           </CardHeader>
