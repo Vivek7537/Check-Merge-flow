@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/DataContext";
-import StatsCards from "@/components/app/dashboard/StatsCards";
 import {
   Card,
   CardContent,
@@ -25,29 +24,12 @@ import ProjectsTable from "@/components/app/projects/ProjectsTable";
 import { ProjectSheet } from "@/components/app/projects/ProjectSheet";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { isDelayed } from "@/lib/utils";
 import ProjectCard from "@/components/app/projects/ProjectCard";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const { projects, editors } = useData();
   const [isSheetOpen, setSheetOpen] = useState(false);
-
-  const totalProjects = projects.length;
-  const pendingProjects = projects.filter(
-    (p) => p.status !== "Done" && p.status !== "Pending by Customer"
-  ).length;
-  const completedProjects = projects.filter((p) => p.status === "Done").length;
-  const delayedProjects = projects.filter(
-    (p) => p.status !== "Done" && isDelayed(p)
-  ).length;
-
-  const stats = [
-    { title: "Total Projects", value: totalProjects },
-    { title: "Pending Projects", value: pendingProjects },
-    { title: "Completed Projects", value: completedProjects },
-    { title: "Delayed Projects", value: delayedProjects },
-  ];
 
   const getInitials = (name: string) =>
     name
@@ -84,24 +66,9 @@ export default function DashboardPage() {
           </Button>
         )}
       </header>
-
-      <StatsCards stats={stats} />
-
+      
       {user.role === "Editor" && (
         <>
-          {myProjects.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold font-headline mb-4">
-                My Active Projects
-              </h2>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {myProjects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
-              </div>
-            </div>
-          )}
-
           {newProjects.length > 0 && (
             <div>
               <h2 className="text-2xl font-bold font-headline mb-4">
@@ -114,10 +81,42 @@ export default function DashboardPage() {
               </div>
             </div>
           )}
+          {myProjects.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold font-headline mt-8 mb-4">
+                My Active Projects
+              </h2>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {myProjects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-1">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>
+                {user.role === 'Editor' ? "Other Projects" : "All Projects"}
+              </captionTitle>
+              <CardDescription>
+                {user.role === 'Editor' ? "Projects assigned to other editors." : "Manage and track all ongoing and completed projects."}
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ProjectsTable
+              projects={user.role === "Editor" ? otherProjects : projects}
+            />
+          </CardContent>
+        </Card>
+      </div>
+
+       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Editor Performance</CardTitle>
@@ -153,21 +152,6 @@ export default function DashboardPage() {
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>All Projects</CardTitle>
-              <CardDescription>
-                Manage and track all ongoing and completed projects.
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <ProjectsTable
-              projects={user.role === "Editor" ? otherProjects : projects}
-            />
           </CardContent>
         </Card>
       </div>
