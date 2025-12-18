@@ -15,14 +15,14 @@ import {
 import ProjectsTable from "@/components/app/projects/ProjectsTable";
 import { ProjectSheet } from "@/components/app/projects/ProjectSheet";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Grid, List, CheckCircle, Clock, AlertTriangle, Camera } from "lucide-react";
+import { PlusCircle, Grid, List, CheckCircle, Clock, AlertTriangle, Camera, User } from "lucide-react";
 import { Project } from "@/lib/types";
 import ProjectCard from "@/components/app/projects/ProjectCard";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import StatsCards from "@/components/app/dashboard/StatsCards";
 import { isDelayed } from "@/lib/utils";
 import EditorPerformanceCharts from "@/components/app/dashboard/EditorPerformanceCharts";
-import { differenceInDays, isFuture } from 'date-fns';
+import { differenceInDays, isFuture, formatDistanceToNow } from 'date-fns';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -54,6 +54,10 @@ export default function DashboardPage() {
       isFuture(p.deadline) &&
       differenceInDays(p.deadline, now) <= 3
   );
+
+  const recentlyAssignedProjects = projects
+    .filter(p => p.status === 'Assigned' && p.assignDate)
+    .sort((a, b) => new Date(b.assignDate!).getTime() - new Date(a.assignDate!).getTime());
 
   const editorStats = [
     { title: 'My Active Projects', value: myProjects.filter(p => ['In Progress', 'Assigned'].includes(p.status)).length, icon: Clock },
@@ -148,7 +152,40 @@ export default function DashboardPage() {
                   )}
               </CardContent>
             </Card>
-            <div className="lg:col-span-2">
+             <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle>Recently Assigned Projects</CardTitle>
+                <CardDescription>Editors who recently took new projects.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                 {recentlyAssignedProjects.length > 0 ? (
+                    <div className="space-y-3">
+                      {recentlyAssignedProjects.slice(0,5).map(project => {
+                        const editor = editors.find(e => e.id === project.editorId);
+                        return (
+                          <div key={project.id} className="flex items-start gap-3 text-sm">
+                            <User className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                            <div className="flex-1">
+                              <p className="font-medium">{editor?.name} took "{project.name}"</p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(project.assignDate!), { addSuffix: true })}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                      {recentlyAssignedProjects.length > 5 && (
+                         <p className="text-xs text-muted-foreground pt-2">
+                            + {recentlyAssignedProjects.length - 5} more...
+                         </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No projects have been assigned recently.</p>
+                  )}
+              </CardContent>
+            </Card>
+            <div className="lg:col-span-1">
                 <EditorPerformanceCharts />
             </div>
         </div>
