@@ -11,16 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import StarRating from "@/components/app/shared/StarRating";
 import ProjectsTable from "@/components/app/projects/ProjectsTable";
 import { ProjectSheet } from "@/components/app/projects/ProjectSheet";
 import { Button } from "@/components/ui/button";
@@ -38,24 +28,12 @@ export default function DashboardPage() {
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
 
-  const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
-
   const loggedInEditor = editors.find(e => e.name === user.name);
   const myProjects = loggedInEditor ? projects.filter(p => p.editorId === loggedInEditor.id) : [];
 
   const newProjects = projects.filter(p => p.status === "New");
   
-  const otherProjectsRaw = projects.filter(p => (p.status === 'New' || p.status === 'Assigned'));
-  const otherProjects = otherProjectsRaw.filter((project, index, self) =>
-    index === self.findIndex((p) => (
-      p.id === project.id
-    ))
-  );
+  const otherProjects = projects.filter(p => ['New', 'Assigned'].includes(p.status));
 
   const teamLeaderStats = [
     { title: 'Total Projects', value: projects.length, icon: Grid },
@@ -67,6 +45,8 @@ export default function DashboardPage() {
   const myCompletedProjects = myProjects.filter(p => p.status === 'Done');
   const myDelayedProjects = myProjects.filter(p => isDelayed(p) && p.status !== 'Done');
   const totalPicturesEdited = myCompletedProjects.reduce((acc, p) => acc + (p.picturesEdited || 0), 0);
+  const pendingProjects = projects.filter(p => p.status === 'Pending by Customer');
+
 
   const editorStats = [
     { title: 'My Active Projects', value: myProjects.filter(p => p.status === 'In Progress' || p.status === 'Assigned').length, icon: Clock },
@@ -114,41 +94,39 @@ export default function DashboardPage() {
       </header>
 
        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
+         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle>Editor Ratings</CardTitle>
-            <CardDescription>Live ratings based on performance.</CardDescription>
+            <CardTitle>Pending Projects</CardTitle>
+            <CardDescription>Projects awaiting customer feedback.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Editor</TableHead>
-                  <TableHead className="text-right">Rating</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {editors.map((editor) => (
-                  <TableRow key={editor.id}>
-                    <TableCell className="font-medium flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={`https://api.dicebear.com/8.x/initials/svg?seed=${editor.name}`}
-                          alt={editor.name}
-                        />
-                        <AvatarFallback>
-                          {getInitials(editor.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      {editor.name}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <StarRating rating={editor.rating} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+             {pendingProjects.length > 0 ? (
+                <div className="space-y-2">
+                  {pendingProjects.slice(0,5).map(project => (
+                    <div key={project.id} className="flex items-center gap-3 text-sm">
+                      <Image 
+                        src={project.imageUrl} 
+                        alt={project.name}
+                        width={40}
+                        height={30}
+                        className="rounded-md object-cover h-[30px]"
+                        data-ai-hint={project.imageHint}
+                      />
+                      <div className="flex-1 truncate">
+                        <p className="font-medium truncate">{project.name}</p>
+                        <p className="text-xs text-muted-foreground">{project.telecallerName}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {pendingProjects.length > 5 && (
+                     <p className="text-xs text-muted-foreground pt-2">
+                        + {pendingProjects.length - 5} more...
+                     </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No projects are pending feedback.</p>
+              )}
           </CardContent>
         </Card>
         <div className="lg:col-span-2">
