@@ -31,7 +31,8 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
 
   const loggedInEditor = editors.find(e => e.name === user.name);
-  const myProjects = loggedInEditor ? projects.filter(p => p.editorId === loggedInEditor.id) : [];
+  const myProjects = loggedInEditor ? projects.filter(p => p.editorId === loggedInEditor.id && ['In Progress', 'Assigned'].includes(p.status)) : [];
+
 
   const newProjects = projects.filter(p => p.status === "New");
   
@@ -58,18 +59,23 @@ export default function DashboardPage() {
 
 
   const editorStats = [
-    { title: 'My Active Projects', value: myProjects.filter(p => p.status === 'In Progress' || p.status === 'Assigned').length, icon: Clock },
+    { title: 'My Active Projects', value: myProjects.length, icon: Clock },
     { title: 'My Completed Projects', value: myCompletedProjects.length, icon: CheckCircle },
     { title: 'My Delayed Projects', value: myDelayedProjects.length, icon: AlertTriangle },
     { title: 'Total Pictures Edited', value: totalPicturesEdited, icon: Camera },
   ];
 
 
-  const renderProjects = (projectList: Project[], title: string) => {
+  const renderProjects = (projectList: Project[]) => {
     // Remove duplicates before rendering
     const uniqueProjects = projectList.filter((project, index, self) =>
         index === self.findIndex((p) => p.id === project.id)
     );
+
+    if (viewMode === 'table') {
+        return <ProjectsTable projects={uniqueProjects} />;
+    }
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {uniqueProjects.map((project) => (
@@ -174,7 +180,7 @@ export default function DashboardPage() {
                 <CardDescription>Projects that are ready to be taken.</CardDescription>
             </CardHeader>
             <CardContent>
-                {renderProjects(newProjects, 'New Available Projects')}
+                {renderProjects(newProjects)}
             </CardContent>
          </Card>
       )}
@@ -186,25 +192,24 @@ export default function DashboardPage() {
                 <CardDescription>Projects assigned to you.</CardDescription>
             </CardHeader>
             <CardContent>
-                {renderProjects(myProjects, 'My Active Projects')}
+                {renderProjects(myProjects)}
             </CardContent>
          </Card>
       )}
 
       <div className="grid gap-6 md:grid-cols-1">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>
-                {user.role === 'Editor' ? "Other Projects" : "All Projects"}
-              </CardTitle>
-              <CardDescription>
-                {user.role === 'Editor' ? "Projects that are new or assigned to other editors." : "Manage and track all ongoing and completed projects."}
-              </CardDescription>
-            </div>
+          <CardHeader>
+            <CardTitle>
+              {user.role === 'Editor' ? "Other Projects" : "All Projects"}
+            </CardTitle>
+            <CardDescription>
+              {user.role === 'Editor' ? "Projects that are new or assigned to other editors." : "Manage and track all ongoing and completed projects."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <ProjectsTable projects={user.role === 'Editor' ? otherProjects : projects} />
+             {viewMode === 'card' && renderProjects(user.role === 'Editor' ? otherProjects : projects)}
+             {viewMode === 'table' && <ProjectsTable projects={user.role === 'Editor' ? otherProjects : projects} />}
           </CardContent>
         </Card>
       </div>
