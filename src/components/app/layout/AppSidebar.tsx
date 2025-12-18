@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/DataContext";
-import { LayoutDashboard, Users, PanelLeft, RefreshCw, Trash2 } from "lucide-react";
+import { LayoutDashboard, Users, PanelLeft, Trash2, Briefcase } from "lucide-react";
 import Logo from "@/components/app/shared/Logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import StarRating from "../shared/StarRating";
@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/my-projects", icon: Briefcase, label: "My Projects", role: "Editor" },
 ];
 
 const getInitials = (name: string) =>
@@ -48,6 +49,8 @@ export default function AppSidebar() {
   const { editors, resetData } = useData();
   const pathname = usePathname();
 
+  const filteredNavItems = navItems.filter(item => !item.role || item.role === user.role);
+
   return (
     <Sidebar>
         <SidebarHeader>
@@ -57,7 +60,7 @@ export default function AppSidebar() {
         </SidebarHeader>
         <SidebarContent className="p-2">
             <SidebarMenu>
-            {navItems.map((item) => (
+            {filteredNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild

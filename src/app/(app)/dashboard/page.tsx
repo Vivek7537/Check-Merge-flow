@@ -31,13 +31,10 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
 
   const loggedInEditor = editors.find(e => e.name === user.name);
-  const myProjects = loggedInEditor ? projects.filter(p => p.editorId === loggedInEditor.id && ['In Progress', 'Assigned'].includes(p.status)) : [];
-
-
+  
   const newProjects = projects.filter(p => p.status === "New");
   
   const otherProjects = projects.filter(p => ['New', 'Assigned'].includes(p.status));
-
 
   const teamLeaderStats = [
     { title: 'Total Projects', value: projects.length, icon: Grid },
@@ -46,6 +43,7 @@ export default function DashboardPage() {
     { title: 'Delayed', value: projects.filter(p => isDelayed(p) && p.status !== 'Done').length, icon: AlertTriangle },
   ];
 
+  const myProjects = loggedInEditor ? projects.filter(p => p.editorId === loggedInEditor.id) : [];
   const myCompletedProjects = myProjects.filter(p => p.status === 'Done');
   const myDelayedProjects = myProjects.filter(p => isDelayed(p) && p.status !== 'Done');
   const totalPicturesEdited = myCompletedProjects.reduce((acc, p) => acc + (p.picturesEdited || 0), 0);
@@ -57,9 +55,8 @@ export default function DashboardPage() {
       differenceInDays(p.deadline, now) <= 3
   );
 
-
   const editorStats = [
-    { title: 'My Active Projects', value: myProjects.length, icon: Clock },
+    { title: 'My Active Projects', value: myProjects.filter(p => ['In Progress', 'Assigned'].includes(p.status)).length, icon: Clock },
     { title: 'My Completed Projects', value: myCompletedProjects.length, icon: CheckCircle },
     { title: 'My Delayed Projects', value: myDelayedProjects.length, icon: AlertTriangle },
     { title: 'Total Pictures Edited', value: totalPicturesEdited, icon: Camera },
@@ -67,10 +64,8 @@ export default function DashboardPage() {
 
 
   const renderProjects = (projectList: Project[]) => {
-    // Remove duplicates before rendering
-    const uniqueProjects = projectList.filter((project, index, self) =>
-        index === self.findIndex((p) => p.id === project.id)
-    );
+    const uniqueProjects = Array.from(new Set(projectList.map(p => p.id)))
+      .map(id => projectList.find(p => p.id === id)!);
 
     if (viewMode === 'table') {
         return <ProjectsTable projects={uniqueProjects} />;
@@ -159,7 +154,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-
       {user.role === 'Team Leader' && (
          <StatsCards stats={teamLeaderStats} />
       )}
@@ -172,7 +166,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-
       {user.role === 'Editor' && newProjects.length > 0 && (
          <Card>
             <CardHeader>
@@ -181,18 +174,6 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
                 {renderProjects(newProjects)}
-            </CardContent>
-         </Card>
-      )}
-
-      {user.role === 'Editor' && myProjects.length > 0 && (
-         <Card>
-            <CardHeader>
-                <CardTitle>My Active Projects</CardTitle>
-                <CardDescription>Projects assigned to you.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {renderProjects(myProjects)}
             </CardContent>
          </Card>
       )}
@@ -208,8 +189,7 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-             {viewMode === 'card' && renderProjects(user.role === 'Editor' ? otherProjects : projects)}
-             {viewMode === 'table' && <ProjectsTable projects={user.role === 'Editor' ? otherProjects : projects} />}
+             {renderProjects(user.role === 'Editor' ? otherProjects : projects)}
           </CardContent>
         </Card>
       </div>
