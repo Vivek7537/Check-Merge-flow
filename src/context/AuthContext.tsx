@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
@@ -5,13 +6,12 @@ import { User, UserRole } from '@/lib/types';
 import { initialEditors } from '@/lib/data';
 import { Editor } from '@/lib/types';
 
-const TEAM_LEADER_PASS = "MERGE999";
-const EDITOR_PASS = "MERGE925";
+const USER_PASS = "password123";
 
 interface AuthContextType {
   user: User;
   editors: Editor[];
-  login: (role: UserRole, password: string, name?: string) => boolean;
+  login: (name: string, password: string) => boolean;
   logout: () => void;
 }
 
@@ -33,21 +33,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = (role: UserRole, password: string, name?: string): boolean => {
-    if (role === 'Team Leader' && password === TEAM_LEADER_PASS) {
-      const newUser = { isAuthenticated: true, role: 'Team Leader', name: 'Team Leader' };
+  const login = (name: string, password: string): boolean => {
+    // This is a simplified login. In a real app, you'd check against a database.
+    if (password === USER_PASS && name) {
+      const newUser = { isAuthenticated: true, role: 'Editor' as UserRole, name };
       setUser(newUser);
       sessionStorage.setItem('mergeflow_user', JSON.stringify(newUser));
       return true;
-    }
-    if (role === 'Editor' && password === EDITOR_PASS && name) {
-      const editorExists = initialEditors.some(editor => editor.name === name);
-      if (editorExists) {
-        const newUser = { isAuthenticated: true, role: 'Editor', name };
-        setUser(newUser);
-        sessionStorage.setItem('mergeflow_user', JSON.stringify(newUser));
-        return true;
-      }
     }
     return false;
   };

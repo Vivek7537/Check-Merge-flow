@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -11,7 +12,6 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { LayoutDashboard, FileText, Users, Settings, PanelLeft } from "lucide-react";
 import Logo from "@/components/app/shared/Logo";

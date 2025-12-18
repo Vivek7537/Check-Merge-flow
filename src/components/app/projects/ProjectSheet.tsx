@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -80,7 +81,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditMode = !!project;
-  const canEdit = user.role === 'Team Leader' || (user.role === 'Editor' && (project?.editorId === user.name || !project));
+  const canEdit = true; // All users can edit
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -272,31 +273,29 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
               />
             </div>
             
-            {user.role === 'Team Leader' && (
-              <FormField
-                control={form.control}
-                name="editorId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Assigned Editor</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || "unassigned"} disabled={!canEdit}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Assign an editor" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {editors.map(editor => (
-                          <SelectItem key={editor.id} value={editor.id}>{editor.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+            <FormField
+              control={form.control}
+              name="editorId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Assigned Editor</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || "unassigned"} disabled={!canEdit}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Assign an editor" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
+                      {editors.map(editor => (
+                        <SelectItem key={editor.id} value={editor.id}>{editor.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -365,7 +364,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
             
             <SheetFooter className="sm:justify-between">
                 <div>
-                {isEditMode && user.role === 'Team Leader' && (
+                {isEditMode && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button type="button" variant="destructive" className="mr-auto">

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Project } from "@/lib/types";
 import StatusBadge from "./StatusBadge";
 import { formatDistanceToNow } from 'date-fns';
-import { Clock, Edit, Folder, Tag, User as UserIcon } from 'lucide-react';
+import { Clock, Edit, Folder, User as UserIcon } from 'lucide-react';
 import { ProjectSheet } from './ProjectSheet';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
@@ -32,7 +33,7 @@ export default function ProjectCard({ project }: { project: Project }) {
     <>
       <Card className={cn(
         "flex flex-col overflow-hidden h-full group transition-all hover:shadow-lg hover:-translate-y-1 duration-200",
-        isMyProject && user.role === 'Editor' && "border-primary"
+        isMyProject && "border-primary"
       )}>
         <CardHeader className="p-0 relative">
           <Image

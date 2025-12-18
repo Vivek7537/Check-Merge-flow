@@ -25,7 +25,6 @@ import ProjectsTable from "@/components/app/projects/ProjectsTable";
 import { ProjectSheet } from "@/components/app/projects/ProjectSheet";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import ProjectCard from "@/components/app/projects/ProjectCard";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -39,16 +38,6 @@ export default function DashboardPage() {
       .join("")
       .toUpperCase();
 
-  const myProjects =
-    user.role === "Editor"
-      ? projects.filter((p) => p.editorId === user.name)
-      : [];
-  const newProjects = projects.filter((p) => p.status === "New");
-  const otherProjects =
-    user.role === "Editor"
-      ? projects.filter((p) => p.editorId !== user.name && p.status !== "New")
-      : projects;
-
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between">
@@ -60,59 +49,26 @@ export default function DashboardPage() {
             Welcome back, {user.name}. Here's what's happening.
           </p>
         </div>
-        {user.role === "Team Leader" && (
-          <Button onClick={() => setSheetOpen(true)}>
+        <Button onClick={() => setSheetOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             New Project
-          </Button>
-        )}
+        </Button>
       </header>
-      
-      {user.role === "Editor" && (
-        <>
-          {newProjects.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold font-headline mb-4">
-                New Available Projects
-              </h2>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {newProjects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
-              </div>
-            </div>
-          )}
-          {myProjects.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold font-headline mt-8 mb-4">
-                My Active Projects
-              </h2>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {myProjects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
-              </div>
-            </div>
-          )}
-        </>
-      )}
 
       <div className="grid gap-6 md:grid-cols-1">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>
-                {user.role === 'Editor' ? "Other Projects" : "All Projects"}
+                All Projects
               </CardTitle>
               <CardDescription>
-                {user.role === 'Editor' ? "Projects assigned to other editors." : "Manage and track all ongoing and completed projects."}
+                Manage and track all ongoing and completed projects.
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent>
-            <ProjectsTable
-              projects={user.role === "Editor" ? otherProjects : projects}
-            />
+            <ProjectsTable projects={projects} />
           </CardContent>
         </Card>
       </div>
