@@ -43,12 +43,12 @@ export default function MyProjectsPage() {
         </p>
       </header>
 
-      <Tabs defaultValue="active" className="w-full">
+      <Tabs defaultValue="all" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="completed">Completed</TabsTrigger>
           <TabsTrigger value="delayed">Delayed</TabsTrigger>
-          <TabsTrigger value="all">All</TabsTrigger>
         </TabsList>
         <TabsContent value="active" className="mt-6">
           {renderProjectGrid(activeProjects, "You have no active projects.")}
