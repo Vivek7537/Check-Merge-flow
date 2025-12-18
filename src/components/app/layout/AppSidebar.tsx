@@ -16,19 +16,13 @@ import { useAuth } from "@/context/AuthContext";
 import { LayoutDashboard, FileText, Users, Settings, PanelLeft } from "lucide-react";
 import Logo from "@/components/app/shared/Logo";
 
-const teamLeaderNav = [
+const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/reports", icon: FileText, label: "Reports" },
-];
-
-const editorNav = [
-    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
 ];
 
 export default function AppSidebar() {
   const { user } = useAuth();
   const pathname = usePathname();
-  const navItems = user.role === "Team Leader" ? teamLeaderNav : editorNav;
 
   return (
     <Sidebar>
@@ -44,7 +38,7 @@ export default function AppSidebar() {
                 <Link href={item.href} passHref legacyBehavior>
                     <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.href}
+                    isActive={pathname.startsWith(item.href)}
                     tooltip={{ children: item.label }}
                     >
                     <a>
