@@ -19,13 +19,16 @@ export default function ProjectCard({ project }: { project: Project }) {
   const { user } = useAuth();
   const { updateProject, editors } = useData();
 
-  const canEdit = user.role === 'Team Leader' || (user.role === 'Editor' && (project.editorId === user.name || project.status === 'New'));
+  const loggedInEditor = editors.find(e => e.name === user.name);
+  const isMyProject = loggedInEditor ? project.editorId === loggedInEditor.id : false;
+  
+  const canEdit = user.role === 'Team Leader' || (user.role === 'Editor' && (isMyProject || project.status === 'New'));
   const editor = editors.find(e => e.id === project.editorId);
-  const isMyProject = project.editorId === user.name;
+  
 
   const handleTakeProject = () => {
-    if (user.role === 'Editor' && project.status === 'New') {
-      updateProject(project.id, { editorId: user.name, status: 'Assigned', assignDate: new Date() });
+    if (user.role === 'Editor' && project.status === 'New' && loggedInEditor) {
+      updateProject(project.id, { editorId: loggedInEditor.id, status: 'Assigned', assignDate: new Date() });
     }
   }
 

@@ -24,7 +24,7 @@ import StarRating from "@/components/app/shared/StarRating";
 import ProjectsTable from "@/components/app/projects/ProjectsTable";
 import { ProjectSheet } from "@/components/app/projects/ProjectSheet";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Grid, List } from "lucide-react";
+import { PlusCircle, Grid, List, CheckCircle, Clock, Image, AlertTriangle } from "lucide-react";
 import { Project } from "@/lib/types";
 import ProjectCard from "@/components/app/projects/ProjectCard";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -45,22 +45,36 @@ export default function DashboardPage() {
       .join("")
       .toUpperCase();
 
-  const myProjects = projects.filter(p => p.editorId === user.name);
+  const loggedInEditor = editors.find(e => e.name === user.name);
+  const myProjects = loggedInEditor ? projects.filter(p => p.editorId === loggedInEditor.id) : [];
+
   const newProjects = projects.filter(p => p.status === "New");
   
-  const otherProjectsRaw = projects.filter(p => (p.status === 'New' || p.status === 'Assigned') && p.editorId !== user.name);
+  const otherProjectsRaw = projects.filter(p => (p.status === 'New' || p.status === 'Assigned') && p.editorId !== loggedInEditor?.id);
   const otherProjects = otherProjectsRaw.filter((project, index, self) =>
     index === self.findIndex((p) => (
       p.id === project.id
     ))
   );
 
-  const stats = [
+  const teamLeaderStats = [
     { title: 'Total Projects', value: projects.length, icon: Grid },
-    { title: 'In Progress', value: projects.filter(p => p.status === 'In Progress').length, icon: List },
-    { title: 'Completed', value: projects.filter(p => p.status === 'Done').length, icon: PlusCircle },
-    { title: 'Delayed', value: projects.filter(p => isDelayed(p) && p.status !== 'Done').length, icon: Grid },
-  ]
+    { title: 'In Progress', value: projects.filter(p => p.status === 'In Progress').length, icon: Clock },
+    { title: 'Completed', value: projects.filter(p => p.status === 'Done').length, icon: CheckCircle },
+    { title: 'Delayed', value: projects.filter(p => isDelayed(p) && p.status !== 'Done').length, icon: AlertTriangle },
+  ];
+
+  const myCompletedProjects = myProjects.filter(p => p.status === 'Done');
+  const myDelayedProjects = myProjects.filter(p => isDelayed(p) && p.status !== 'Done');
+  const totalPicturesEdited = myCompletedProjects.reduce((acc, p) => acc + (p.picturesEdited || 0), 0);
+
+  const editorStats = [
+    { title: 'My Active Projects', value: myProjects.filter(p => p.status === 'In Progress' || p.status === 'Assigned').length, icon: Clock },
+    { title: 'My Completed Projects', value: myCompletedProjects.length, icon: CheckCircle },
+    { title: 'My Delayed Projects', value: myDelayedProjects.length, icon: AlertTriangle },
+    { title: 'Total Pictures Edited', value: totalPicturesEdited, icon: Image },
+  ];
+
 
   const renderProjects = (projectList: Project[], title: string) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -100,7 +114,10 @@ export default function DashboardPage() {
       </header>
 
       {user.role === 'Team Leader' && (
-         <StatsCards stats={stats} />
+         <StatsCards stats={teamLeaderStats} />
+      )}
+       {user.role === 'Editor' && (
+         <StatsCards stats={editorStats} />
       )}
 
       {user.role === 'Editor' && newProjects.length > 0 && (
@@ -183,11 +200,9 @@ export default function DashboardPage() {
             </Table>
           </CardContent>
         </Card>
-        {user.role === 'Team Leader' && (
-           <div className="lg:col-span-2">
-             <EditorPerformanceCharts />
-           </div>
-        )}
+        <div className="lg:col-span-2">
+            <EditorPerformanceCharts />
+        </div>
       </div>
       <ProjectSheet open={isSheetOpen} onOpenChange={setSheetOpen} />
     </div>

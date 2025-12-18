@@ -81,7 +81,9 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditMode = !!project;
-  const canEdit = user.role === 'Team Leader' || (isEditMode && project.editorId === user.name) || !isEditMode;
+  const loggedInEditor = editors.find(e => e.name === user.name);
+  const isMyProject = loggedInEditor && project ? project.editorId === loggedInEditor.id : false;
+  const canEdit = user.role === 'Team Leader' || (isEditMode && isMyProject) || !isEditMode;
 
 
   const form = useForm<z.infer<typeof formSchema>>({
