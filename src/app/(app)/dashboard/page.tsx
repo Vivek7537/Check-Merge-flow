@@ -30,6 +30,7 @@ import ProjectCard from "@/components/app/projects/ProjectCard";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import StatsCards from "@/components/app/dashboard/StatsCards";
 import { isDelayed } from "@/lib/utils";
+import EditorPerformanceCharts from "@/components/app/dashboard/EditorPerformanceCharts";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -52,7 +53,7 @@ export default function DashboardPage() {
     { title: 'Total Projects', value: projects.length, icon: Grid },
     { title: 'In Progress', value: projects.filter(p => p.status === 'In Progress').length, icon: List },
     { title: 'Completed', value: projects.filter(p => p.status === 'Done').length, icon: PlusCircle },
-    { title: 'Delayed', value: projects.filter(isDelayed).length, icon: Grid },
+    { title: 'Delayed', value: projects.filter(p => isDelayed(p) && p.status !== 'Done').length, icon: Grid },
   ]
 
   const renderProjects = (projectList: Project[], title: string) => (
@@ -141,7 +142,7 @@ export default function DashboardPage() {
        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle>Editor Performance</CardTitle>
+            <CardTitle>Editor Ratings</CardTitle>
             <CardDescription>Live ratings based on performance.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -176,6 +177,11 @@ export default function DashboardPage() {
             </Table>
           </CardContent>
         </Card>
+        {user.role === 'Team Leader' && (
+           <div className="lg:col-span-2">
+             <EditorPerformanceCharts />
+           </div>
+        )}
       </div>
       <ProjectSheet open={isSheetOpen} onOpenChange={setSheetOpen} />
     </div>
