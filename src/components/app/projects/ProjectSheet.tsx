@@ -81,7 +81,8 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditMode = !!project;
-  const canEdit = true; // All users can edit
+  const canEdit = user.role === 'Team Leader' || (isEditMode && project.editorId === user.name) || !isEditMode;
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -279,7 +280,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Assigned Editor</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || "unassigned"} disabled={!canEdit}>
+                  <Select onValueChange={field.onChange} value={field.value || "unassigned"} disabled={user.role !== 'Team Leader'}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Assign an editor" />
@@ -364,7 +365,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
             
             <SheetFooter className="sm:justify-between">
                 <div>
-                {isEditMode && (
+                {isEditMode && user.role === 'Team Leader' && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button type="button" variant="destructive" className="mr-auto">

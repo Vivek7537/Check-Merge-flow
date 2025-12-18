@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
@@ -17,8 +18,41 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider = ({ children }: { children: ReactNode }) => {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [editors, setEditors] = useState<Editor[]>(initialEditors);
+
+  useEffect(() => {
+    try {
+        const storedProjects = localStorage.getItem('mergeflow_projects');
+        if (storedProjects) {
+            const parsedProjects = JSON.parse(storedProjects).map((p: any) => ({
+                ...p,
+                deadline: new Date(p.deadline),
+                creationDate: new Date(p.creationDate),
+                assignDate: p.assignDate ? new Date(p.assignDate) : null,
+                completionDate: p.completionDate ? new Date(p.completionDate) : null,
+            }));
+            setProjects(parsedProjects);
+        } else {
+            setProjects(initialProjects);
+        }
+    } catch (error) {
+        console.error("Failed to parse projects from localStorage, using initial data.", error);
+        setProjects(initialProjects);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Persist projects to localStorage
+    if (projects.length > 0) {
+      try {
+        localStorage.setItem('mergeflow_projects', JSON.stringify(projects));
+      } catch (error) {
+        console.error("Failed to save projects to localStorage", error);
+      }
+    }
+  }, [projects]);
+
 
   useEffect(() => {
     // Recalculate editor ratings whenever projects change

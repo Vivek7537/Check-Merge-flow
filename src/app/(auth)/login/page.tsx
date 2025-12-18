@@ -18,11 +18,21 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, LogIn } from "lucide-react";
 import Logo from "@/components/app/shared/Logo";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { UserRole } from "@/lib/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
-  const [username, setUsername] = useState("");
+  const { login, editors } = useAuth();
+  const [role, setRole] = useState<UserRole>("Editor");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +42,15 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
 
-    const success = login(username, password);
+    if (role === 'Editor' && !name) {
+      setError("Please select an editor.");
+      setIsLoading(false);
+      return;
+    }
+    
+    const loginName = role === 'Team Leader' ? 'Team Leader' : name;
+
+    const success = login(loginName, password, role);
 
     if (success) {
       router.push("/dashboard");
@@ -65,16 +83,38 @@ export default function LoginPage() {
                 </Alert>
               )}
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                 <Input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter your username"
-                  required
-                />
+                <Label>Role</Label>
+                <RadioGroup
+                  defaultValue="Editor"
+                  className="flex gap-4"
+                  onValueChange={(value: UserRole) => setRole(value)}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Editor" id="r1" />
+                    <Label htmlFor="r1">Editor</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Team Leader" id="r2" />
+                    <Label htmlFor="r2">Team Leader</Label>
+                  </div>
+                </RadioGroup>
               </div>
+
+              {role === 'Editor' && (
+                 <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                   <Select onValueChange={setName} value={name}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your name" />
+                      </SelectTrigger>
+                    <SelectContent>
+                      {editors.map(editor => (
+                        <SelectItem key={editor.id} value={editor.name}>{editor.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>

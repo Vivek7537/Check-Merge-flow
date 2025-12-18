@@ -11,7 +11,7 @@ const USER_PASS = "password123";
 interface AuthContextType {
   user: User;
   editors: Editor[];
-  login: (name: string, password: string) => boolean;
+  login: (name: string, password: string, role: UserRole) => boolean;
   logout: () => void;
 }
 
@@ -33,10 +33,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = (name: string, password: string): boolean => {
+  const login = (name: string, password: string, role: UserRole): boolean => {
     // This is a simplified login. In a real app, you'd check against a database.
-    if (password === USER_PASS && name) {
-      const newUser = { isAuthenticated: true, role: 'Editor' as UserRole, name };
+    if (password === USER_PASS) {
+      const newUser = { isAuthenticated: true, role: role, name: name };
       setUser(newUser);
       sessionStorage.setItem('mergeflow_user', JSON.stringify(newUser));
       return true;
