@@ -39,7 +39,7 @@ import { CalendarIcon, Trash2, Upload } from "lucide-react";
 import { format } from "date-fns";
 import { useData } from "@/context/DataContext";
 import { useAuth } from "@/context/AuthContext";
-import { Project, ProjectStatuses, ProjectCategories } from "@/lib/types";
+import { Project, ProjectStatuses } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import {
@@ -91,7 +91,7 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
       telecallerName: project?.telecallerName || "",
       deadline: project ? new Date(project.deadline) : new Date(),
       notes: project?.notes || "",
-      imageUrl: project?.imageUrl || "",
+      imageUrl: project?.imageUrl || "https://picsum.photos/seed/placeholder/600/400",
       imageHint: project?.imageHint || "random",
       editorId: project?.editorId || null,
       status: project?.status || "New",
@@ -113,9 +113,6 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
     try {
         const projectData = {
           ...values,
-          category: project?.category || "Personal",
-          picturesEdited: project?.picturesEdited || 0,
-          editorId: values.editorId === "unassigned" ? null : values.editorId,
           creationDate: project?.creationDate || new Date(),
           assignDate: values.editorId ? (project?.assignDate || new Date()) : null,
           completionDate: values.status === 'Done' ? (project?.completionDate || new Date()) : null,
@@ -366,5 +363,3 @@ export function ProjectSheet({ open, onOpenChange, project }: ProjectSheetProps)
     </Sheet>
   );
 }
-
-    

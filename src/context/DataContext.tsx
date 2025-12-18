@@ -2,7 +2,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Project, Editor, ProjectStatus, ProjectCategory } from '@/lib/types';
+import { Project, Editor } from '@/lib/types';
 import { initialProjects, initialEditors } from '@/lib/data';
 import { calculateEditorRating } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -10,8 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 interface DataContextType {
   projects: Project[];
   editors: Editor[];
-  updateProject: (projectId: string, updatedData: Partial<Project>) => void;
-  addProject: (newProject: Omit<Project, 'id' | 'category' | 'picturesEdited'>) => void;
+  updateProject: (projectId: string, updatedData: Partial<Omit<Project, 'id'>>) => void;
+  addProject: (newProject: Omit<Project, 'id'>) => void;
   deleteProject: (projectId: string) => void;
   getProjectById: (projectId: string) => Project | undefined;
   resetData: () => void;
@@ -100,7 +100,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   }, [projects]);
 
 
-  const updateProject = (projectId: string, updatedData: Partial<Project>) => {
+  const updateProject = (projectId: string, updatedData: Partial<Omit<Project, 'id'>>) => {
     setProjects(prevProjects =>
       prevProjects.map(project =>
         project.id === projectId ? { ...project, ...updatedData } : project
@@ -108,13 +108,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
-  const addProject = (newProjectData: Omit<Project, 'id' | 'category' | 'picturesEdited'>) => {
+  const addProject = (newProjectData: Omit<Project, 'id'>) => {
     const newIdNumber = (projects[0] ? parseInt(projects[0].id.split('-')[1]) : 0) + 1;
     const newProject: Project = {
       ...newProjectData,
       id: `PROJ-${String(newIdNumber).padStart(3, '0')}`,
-      category: "Personal", // default value
-      picturesEdited: 0, // default value
     };
     setProjects(prevProjects => [newProject, ...prevProjects].sort((a,b) => b.id.localeCompare(a.id)));
   };

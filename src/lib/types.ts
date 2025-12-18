@@ -1,3 +1,4 @@
+
 export type UserRole = "Team Leader" | "Editor";
 
 export type User = {
@@ -37,9 +38,9 @@ export interface Project {
   telecallerName: string;
   imageUrl: string;
   imageHint: string;
-  category: ProjectCategory;
-  picturesEdited?: number;
   creationDate: Date;
+  category?: ProjectCategory;
+  picturesEdited?: number;
 }
 
 export interface Editor {
